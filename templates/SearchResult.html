@@ -1,0 +1,19 @@
+<form method="POST">
+    <input placeholder="Display Name" name="name">
+    <input placeholder="Stack Exchange Site" name="site">
+    <input placeholder="User_id" name="user_id">
+    <input type="submit">
+</form>
+
+{% if name %}
+  <h1>The data for user: {{name}}</h1>
+{% endif %}
+
+<body>{{users}} {{user_id}}
+  
+  <p>This user has a total of: {{questions[0]}} questions on the site</p>
+  <p>The latest question asked for this user was on: {{questions[1]}}</p>
+
+ <img src={{url}} alt="Chart">
+
+</body>

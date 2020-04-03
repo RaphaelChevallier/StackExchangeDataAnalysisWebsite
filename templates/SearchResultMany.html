@@ -1,0 +1,15 @@
+<form method="POST">
+    <input placeholder="Display Name" name="name">
+    <input placeholder="Stack Exchange Site" name="site">
+    <input placeholder="User_id" name="user_id">
+    <input type="submit">
+</form>
+
+<h1>We have found numerous display names here that contain the name you entered. Please choose one below and search their user_id to inspect:</h1>
+
+<body>
+{% for i in range(userAmount)%}
+       <p>{{users[i]}} with user id of: {{user_id[i]}}</p>  
+    <br/> 
+{% endfor %}
+</body>
