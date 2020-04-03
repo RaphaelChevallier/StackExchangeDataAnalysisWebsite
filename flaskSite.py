@@ -64,7 +64,7 @@ def processing_name():
             return render_template('SearchResultNone.html', name = processed_name)
         else:
             questionAmount = question_frequency(listSameUsersID, site)
-            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionAmount)
+            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionAmount, url='static/images/{}'.format(questionAmount[2]))
 
 if __name__ == '__main__':
     app.run(debug=True)
