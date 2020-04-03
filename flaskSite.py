@@ -27,7 +27,7 @@ def question_frequency(id, site):
     plt.switch_backend('Agg')
     plt.bar(popularTags.keys(), popularTags.values())
     plt.title('Most popular subjects of questions')
-    for filename in glob.glob("static/images/popTags_{}*".format(id)):
+    for filename in glob.glob("static/images/popTags_{}*".format(id[0])):
         os.remove(filename) 
     image_name = "popTags_{}_{}.png".format(id[0],datetime.datetime.utcnow().isoformat())
     plt.savefig('static/images/{}'.format(image_name))
