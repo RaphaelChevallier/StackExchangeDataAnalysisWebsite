@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, flash
 from stackapi import StackAPI
 import os, glob
 import json
+import time
 import datetime
 from operator import itemgetter 
 import matplotlib.pyplot as plt
@@ -27,7 +28,9 @@ def question_frequency(id, site):
     plt.switch_backend('Agg')
     plt.bar(popularTags.keys(), popularTags.values())
     plt.title('Most popular subjects of questions')
-    for filename in glob.glob("static/images/popTags_*"):
+    plt.xlabel("Tags")
+    plt.ylabel("Amount of Tags")
+    for filename in glob.glob("static/images/*"):
         if filename is None:
             continue
         else:
@@ -40,6 +43,24 @@ def question_frequency(id, site):
             mostRecentQuestion = i['creation_date']
     return len(questions['items']), datetime.datetime.fromtimestamp(mostRecentQuestion).strftime('%c'), image_name
 
+def posting_frequency(id, site, createdUserDate, totalQuestions):
+    posts = site.fetch('users/{ids}/posts', ids=id, order='asc', sort='creation')
+    frequency_graph = dict()
+    for post in posts['items']:
+        humanTime = time.strftime('%m-%Y', time.localtime(post['creation_date']))
+        if humanTime not in frequency_graph:
+            frequency_graph[humanTime] = 1
+        else:
+            frequency_graph[humanTime] +=1
+    plt.switch_backend('Agg')
+    plt.bar(frequency_graph.keys(), frequency_graph.values())
+    plt.title('Posting frequency by active months')
+    plt.xlabel("Months")
+    plt.ylabel("Amount of Posts")
+    image_name = "postFrequency_{}_{}.png".format(id[0],datetime.datetime.utcnow().isoformat())
+    plt.savefig('static/images/{}'.format(image_name))
+    return image_name
+
 @app.route('/', methods=['POST'])
 def processing_name():
     name = request.form['name']
@@ -51,8 +72,10 @@ def processing_name():
         site = StackAPI("stackoverflow")
     if(request.form['user_id']):
         users = site.fetch('users', ids=[request.form['user_id']])
+        createdUserDate = users['items'][0]['creation_date']
         questionAmount = question_frequency([request.form['user_id']], site)
-        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  questions = questionAmount, url='static/images/{}'.format(questionAmount[2]))
+        post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionAmount[0])
+        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  questions = questionAmount, question_url='static/images/{}'.format(questionAmount[2]), posting_url='static/images/{}'.format(post_frequency))
     else: 
         processed_name = name
         users = site.fetch('users', inname=processed_name)
@@ -67,7 +90,9 @@ def processing_name():
             return render_template('SearchResultNone.html', name = processed_name)
         else:
             questionAmount = question_frequency(listSameUsersID, site)
-            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionAmount, url='static/images/{}'.format(questionAmount[2]))
+            createdUserDate = listSameUsers[0]['items'][0]['creation_date']
+            post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionAmount[0])
+            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionAmount, url='static/images/{}'.format(questionAmount[2]), posting_url='static/images/{}'.format(post_frequency))
 
 if __name__ == '__main__':
     app.run(debug=True)
