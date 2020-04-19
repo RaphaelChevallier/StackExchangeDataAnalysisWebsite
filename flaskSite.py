@@ -15,7 +15,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 def first_form():
     return render_template('FirstSearchForm.html')
 
-def question_frequency(id, site):
+def questions_answers(id, site):
     questions = site.fetch('users/{ids}/questions', ids=id)
     topAnswersTags = site.fetch('users/{ids}/top-answer-tags', ids=id)
     topTagsAnswered = dict()
@@ -90,9 +90,9 @@ def processing_name():
     if(request.form['user_id']):
         users = site.fetch('users', ids=[request.form['user_id']])
         createdUserDate = users['items'][0]['creation_date']
-        questionAmount = question_frequency([request.form['user_id']], site)
-        post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionAmount[0])
-        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  questions = questionAmount, question_url='static/images/{}'.format(questionAmount[2]), answerTags_url='static/images/{}'.format(questionAmount[3]), posting_url='static/images/{}'.format(post_frequency))
+        questionsAnswers = questions_answers([request.form['user_id']], site)
+        post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionsAnswers[0])
+        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency))
     else: 
         processed_name = name
         users = site.fetch('users', inname=processed_name)
@@ -106,10 +106,10 @@ def processing_name():
         elif(len(listSameUsers) <= 0):
             return render_template('SearchResultNone.html', name = processed_name)
         else:
-            questionAmount = question_frequency(listSameUsersID, site)
+            questionsAnswers = questions_answers(listSameUsersID, site)
             createdUserDate = listSameUsers[0]['items'][0]['creation_date']
-            post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionAmount[0])
-            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionAmount, question_url='static/images/{}'.format(questionAmount[2]), answerTags_url='static/images/{}'.format(questionAmount[3]), posting_url='static/images/{}'.format(post_frequency))
+            post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionsAnswers[0])
+            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency))
 
 if __name__ == '__main__':
     app.run(debug=True)
