@@ -15,11 +15,17 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 def first_form():
     return render_template('FirstSearchForm.html')
 
+def badge_check(id, site):
+    badges = site.fetch('users/{ids}/badges', ids=id)
+    badge_table = dict()
+    for badge in badges['items']:
+        badge_table[badge['name']] = badge['rank']
+    return badge_table
+
 def questions_answers(id, site):
     questions = site.fetch('users/{ids}/questions', ids=id)
     topAnswersTags = site.fetch('users/{ids}/top-answer-tags', ids=id)
     topTagsAnswered = dict()
-    print(topAnswersTags['items'])
     for answerTags in topAnswersTags['items']:
         if answerTags['tag_name'] not in topTagsAnswered:
             topTagsAnswered[answerTags['tag_name']] = 1
@@ -92,7 +98,8 @@ def processing_name():
         createdUserDate = users['items'][0]['creation_date']
         questionsAnswers = questions_answers([request.form['user_id']], site)
         post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionsAnswers[0])
-        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency))
+        badges = badge_check([request.form['user_id']], site)
+        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  badges=badges, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency))
     else: 
         processed_name = name
         users = site.fetch('users', inname=processed_name)
@@ -108,7 +115,8 @@ def processing_name():
         else:
             questionsAnswers = questions_answers(listSameUsersID, site)
             createdUserDate = listSameUsers[0]['items'][0]['creation_date']
-            post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionsAnswers[0])
+            post_frequency = posting_frequency(listSameUsersID, site, createdUserDate, questionsAnswers[0])
+            badges = badge_check(listSameUsersID, site)
             return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency))
 
 if __name__ == '__main__':
