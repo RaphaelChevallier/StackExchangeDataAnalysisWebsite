@@ -17,6 +17,15 @@ def first_form():
 
 def question_frequency(id, site):
     questions = site.fetch('users/{ids}/questions', ids=id)
+    topAnswersTags = site.fetch('users/{ids}/top-answer-tags', ids=id)
+    topTagsAnswered = dict()
+    print(topAnswersTags['items'])
+    for answerTags in topAnswersTags['items']:
+        if answerTags['tag_name'] not in topTagsAnswered:
+            topTagsAnswered[answerTags['tag_name']] = 1
+        else:
+            topTagsAnswered[answerTags['tag_name']] +=1
+    topTagsAnswered = dict(sorted(topTagsAnswered.items(), key = itemgetter(1), reverse = True)[:5])
     popularTags = dict()
     for i in questions['items']:
         for j in i['tags']:
@@ -26,10 +35,11 @@ def question_frequency(id, site):
                 popularTags[j] = 1
     popularTags = dict(sorted(popularTags.items(), key = itemgetter(1), reverse = True)[:5])
     plt.switch_backend('Agg')
+    plt.figure(0)
     plt.bar(popularTags.keys(), popularTags.values())
-    plt.title('Most popular subjects of questions')
+    plt.title('Most popular tags user asked questions too')
     plt.xlabel("Tags")
-    plt.ylabel("Amount of Tags")
+    plt.ylabel("Amount of Questions Answered")
     for filename in glob.glob("static/images/*"):
         if filename is None:
             continue
@@ -37,11 +47,18 @@ def question_frequency(id, site):
             os.remove(filename) 
     image_name = "popTags_{}_{}.png".format(id[0],datetime.datetime.utcnow().isoformat())
     plt.savefig('static/images/{}'.format(image_name))
+    plt.figure(1)
+    plt.bar(topTagsAnswered.keys(), topTagsAnswered.values())
+    plt.title('Most popular tags user answered questions too')
+    plt.xlabel("Tags")
+    plt.ylabel("Amount of Tags")
+    image_name2 = "popAnsweredTags_{}_{}.png".format(id[0],datetime.datetime.utcnow().isoformat())
+    plt.savefig('static/images/{}'.format(image_name2))
     mostRecentQuestion = 0
     for i in questions['items']:
         if mostRecentQuestion < i['creation_date']:
             mostRecentQuestion = i['creation_date']
-    return len(questions['items']), datetime.datetime.fromtimestamp(mostRecentQuestion).strftime('%c'), image_name
+    return len(questions['items']), datetime.datetime.fromtimestamp(mostRecentQuestion).strftime('%c'), image_name, image_name2
 
 def posting_frequency(id, site, createdUserDate, totalQuestions):
     posts = site.fetch('users/{ids}/posts', ids=id, order='asc', sort='creation')
@@ -75,7 +92,7 @@ def processing_name():
         createdUserDate = users['items'][0]['creation_date']
         questionAmount = question_frequency([request.form['user_id']], site)
         post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionAmount[0])
-        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  questions = questionAmount, question_url='static/images/{}'.format(questionAmount[2]), posting_url='static/images/{}'.format(post_frequency))
+        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  questions = questionAmount, question_url='static/images/{}'.format(questionAmount[2]), answerTags_url='static/images/{}'.format(questionAmount[3]), posting_url='static/images/{}'.format(post_frequency))
     else: 
         processed_name = name
         users = site.fetch('users', inname=processed_name)
@@ -92,7 +109,7 @@ def processing_name():
             questionAmount = question_frequency(listSameUsersID, site)
             createdUserDate = listSameUsers[0]['items'][0]['creation_date']
             post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionAmount[0])
-            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionAmount, url='static/images/{}'.format(questionAmount[2]), posting_url='static/images/{}'.format(post_frequency))
+            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionAmount, question_url='static/images/{}'.format(questionAmount[2]), answerTags_url='static/images/{}'.format(questionAmount[3]), posting_url='static/images/{}'.format(post_frequency))
 
 if __name__ == '__main__':
     app.run(debug=True)
