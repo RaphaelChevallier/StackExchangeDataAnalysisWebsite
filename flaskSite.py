@@ -125,7 +125,7 @@ def processing_name():
                 answerers[user['user']['display_name']] = user['user']['user_id']
             tagAnswers[tag] = {k: answerers[k] for k in list(answerers)[:5]}
         timeLine = timeline([request.form['user_id']], site)
-        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  badges=badges, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency), tagAnswerers=tagAnswers, timeline=timeLine)
+        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  badges=badges, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency), tagAnswerers=tagAnswers, timeline='static/images/{}'.format(timeLine))
     else: 
         processed_name = name
         users = site.fetch('users', inname=processed_name)
