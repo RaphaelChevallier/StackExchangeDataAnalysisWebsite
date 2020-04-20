@@ -15,6 +15,24 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 def first_form():
     return render_template('FirstSearchForm.html')
 
+# def timeline(id,site):
+#     timeline = site.fetch('users/{ids}/timeline', ids=id, fromdate=(datetime.date.today() + datetime.timedelta(6*365/12)).isoformat())
+#     dates = dict()
+#     for date in timeline['items]:']:
+#         dates[time.strftime('%m-%Y', time.localtime(date['creation_date']))]  = date['post_type']
+#     plt.switch_backend('Agg')
+#     plt.plot_date(dates.keys(), dates.values())
+#     plt.title('Recent 6 Months Timeline of Activity')
+#     plt.xlabel("Dates")
+#     plt.ylabel("Question Type")
+#     image_name = "timeline{}_{}.png".format(id[0],datetime.datetime.utcnow().isoformat())
+#     plt.savefig('static/images/{}'.format(image_name))
+#     return image_name
+
+def tag_help(id, site, tag):
+    tagHelp = site.fetch('tags/{tag}/top-answerers/month', tag=tag)
+    return tagHelp['items']
+
 def badge_check(id, site):
     badges = site.fetch('users/{ids}/badges', ids=id)
     badge_table = dict()
@@ -64,7 +82,7 @@ def questions_answers(id, site):
     for i in questions['items']:
         if mostRecentQuestion < i['creation_date']:
             mostRecentQuestion = i['creation_date']
-    return len(questions['items']), datetime.datetime.fromtimestamp(mostRecentQuestion).strftime('%c'), image_name, image_name2
+    return len(questions['items']), datetime.datetime.fromtimestamp(mostRecentQuestion).strftime('%c'), image_name, image_name2, popularTags.keys()
 
 def posting_frequency(id, site, createdUserDate, totalQuestions):
     posts = site.fetch('users/{ids}/posts', ids=id, order='asc', sort='creation')
@@ -99,7 +117,15 @@ def processing_name():
         questionsAnswers = questions_answers([request.form['user_id']], site)
         post_frequency = posting_frequency([request.form['user_id']], site, createdUserDate, questionsAnswers[0])
         badges = badge_check([request.form['user_id']], site)
-        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  badges=badges, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency))
+        tagAnswers = dict()
+        for tag in questionsAnswers[4]:
+            answerers = dict()
+            tagAnswerers = tag_help([request.form['user_id']], site, tag)
+            for user in tagAnswerers:
+                answerers[user['user']['display_name']] = user['user']['user_id']
+            tagAnswers[tag] = {k: answerers[k] for k in list(answerers)[:5]}
+        # timeLine = timeline([request.form['user_id']], site)
+        return render_template('SearchResult.html', name = users['items'][0]['display_name'], users = users['items'][0]['display_name'], user_id= users['items'][0]['user_id'],  badges=badges, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency), tagAnswerers=tagAnswers)
     else: 
         processed_name = name
         users = site.fetch('users', inname=processed_name)
@@ -117,7 +143,14 @@ def processing_name():
             createdUserDate = listSameUsers[0]['items'][0]['creation_date']
             post_frequency = posting_frequency(listSameUsersID, site, createdUserDate, questionsAnswers[0])
             badges = badge_check(listSameUsersID, site)
-            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency))
+            tagAnswers = dict()
+            for tag in questionsAnswers[4]:
+                answerers = dict()
+                tagAnswerers = tag_help([request.form['user_id']], site, tag)
+                for user in tagAnswerers:
+                    answerers[user['user']['display_name']] = user['user']['user_id']
+                tagAnswers[tag] = {k: answerers[k] for k in list(answerers)[:5]}
+            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency), tagAnswerers=tagAnswers)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -14,12 +14,17 @@
   <p>This user has a total of: {{questions[0]}} questions on the site</p>
   <p>The latest question asked for this user was on: {{questions[1]}}</p>
 
-  <table>
-    {% for key, value in badges.items() %}
-
+  <table style="border:1px solid black; padding: 10px; border-spacing: 15px;">
+    <tr>
+    {% for key,value in badges.items() %}
       <th> {{ key }} </th>
-      <td> {{ value }} </td>
     {% endfor %}
+    </tr>
+    <tr>
+      {% for key,value in badges.items() %}
+        <td> {{ value }} </td>
+      {% endfor %}
+    </tr>
     </table>
 
  <img src={{question_url}} alt="QuestionChart">
@@ -27,5 +32,18 @@
  <img src={{posting_url}} alt="PostingChart">
 
  <img src={{answerTags_url}} alt="AnswerTags">
+
+ <table style="border:1px solid black; padding: 10px; border-spacing: 15px;">
+  <tr>
+  {% for key,value in tagAnswerers.items() %}
+    <th> {{ key }} </th>
+  {% endfor %}
+  </tr>
+  <tr>
+    {% for key,value in tagAnswerers.items() %}
+      <td> {{ value }} </td>
+    {% endfor %}
+  </tr>
+  </table>
 
 </body>
