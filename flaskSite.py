@@ -18,7 +18,7 @@ def first_form():
 def timeline(id,site):
     timeline = site.fetch('users/{ids}/timeline', ids=id, fromdate=(datetime.date.today() + datetime.timedelta(6*365/12)).isoformat())
     dates = dict()
-    for date in timeline['items]:']:
+    for date in timeline['items']:
         dates[time.strftime('%m-%Y', time.localtime(date['creation_date']))]  = date['post_type']
     plt.switch_backend('Agg')
     plt.plot_date(dates.keys(), dates.values())
