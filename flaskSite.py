@@ -150,7 +150,7 @@ def processing_name():
                 for user in tagAnswerers:
                     answerers[user['user']['display_name']] = user['user']['user_id']
                 tagAnswers[tag] = {k: answerers[k] for k in list(answerers)[:5]}
-            timeLine = timeline([request.form['user_id']], site)
+            timeLine = timeline(listSameUsersID, site)
             return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency), tagAnswerers=tagAnswers, timeline='static/images/{}'.format(timeLine))
 
 if __name__ == '__main__':
