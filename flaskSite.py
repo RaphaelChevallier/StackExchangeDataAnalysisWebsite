@@ -15,19 +15,19 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 def first_form():
     return render_template('FirstSearchForm.html')
 
-# def timeline(id,site):
-#     timeline = site.fetch('users/{ids}/timeline', ids=id, fromdate=(datetime.date.today() + datetime.timedelta(6*365/12)).isoformat())
-#     dates = dict()
-#     for date in timeline['items]:']:
-#         dates[time.strftime('%m-%Y', time.localtime(date['creation_date']))]  = date['post_type']
-#     plt.switch_backend('Agg')
-#     plt.plot_date(dates.keys(), dates.values())
-#     plt.title('Recent 6 Months Timeline of Activity')
-#     plt.xlabel("Dates")
-#     plt.ylabel("Question Type")
-#     image_name = "timeline{}_{}.png".format(id[0],datetime.datetime.utcnow().isoformat())
-#     plt.savefig('static/images/{}'.format(image_name))
-#     return image_name
+def timeline(id,site):
+    timeline = site.fetch('users/{ids}/timeline', ids=id, fromdate=(datetime.date.today() + datetime.timedelta(6*365/12)).isoformat())
+    dates = dict()
+    for date in timeline['items]:']:
+        dates[time.strftime('%m-%Y', time.localtime(date['creation_date']))]  = date['post_type']
+    plt.switch_backend('Agg')
+    plt.plot_date(dates.keys(), dates.values())
+    plt.title('Recent 6 Months Timeline of Activity')
+    plt.xlabel("Dates")
+    plt.ylabel("Question Type")
+    image_name = "timeline{}_{}.png".format(id[0],datetime.datetime.utcnow().isoformat())
+    plt.savefig('static/images/{}'.format(image_name))
+    return image_name
 
 def tag_help(id, site, tag):
     tagHelp = site.fetch('tags/{tag}/top-answerers/month', tag=tag)
