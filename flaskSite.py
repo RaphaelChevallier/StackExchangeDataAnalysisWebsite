@@ -140,7 +140,7 @@ def processing_name():
             return render_template('SearchResultNone.html', name = processed_name)
         else:
             questionsAnswers = questions_answers(listSameUsersID, site)
-            createdUserDate = listSameUsers[0]['items'][0]['creation_date']
+            createdUserDate = users['items'][0]['creation_date']
             post_frequency = posting_frequency(listSameUsersID, site, createdUserDate, questionsAnswers[0])
             badges = badge_check(listSameUsersID, site)
             tagAnswers = dict()
@@ -150,7 +150,8 @@ def processing_name():
                 for user in tagAnswerers:
                     answerers[user['user']['display_name']] = user['user']['user_id']
                 tagAnswers[tag] = {k: answerers[k] for k in list(answerers)[:5]}
-            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency), tagAnswerers=tagAnswers)
+            timeLine = timeline([request.form['user_id']], site)
+            return render_template('SearchResult.html', name = processed_name, users = listSameUsers, user_id= listSameUsersID, questions = questionsAnswers, question_url='static/images/{}'.format(questionsAnswers[2]), answerTags_url='static/images/{}'.format(questionsAnswers[3]), posting_url='static/images/{}'.format(post_frequency), tagAnswerers=tagAnswers, timeline='static/images/{}'.format(timeLine))
 
 if __name__ == '__main__':
     app.run(debug=True)
