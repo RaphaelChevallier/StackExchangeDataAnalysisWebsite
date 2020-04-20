@@ -146,7 +146,7 @@ def processing_name():
             tagAnswers = dict()
             for tag in questionsAnswers[4]:
                 answerers = dict()
-                tagAnswerers = tag_help([request.form['user_id']], site, tag)
+                tagAnswerers = tag_help(listSameUsersID, site, tag)
                 for user in tagAnswerers:
                     answerers[user['user']['display_name']] = user['user']['user_id']
                 tagAnswers[tag] = {k: answerers[k] for k in list(answerers)[:5]}
